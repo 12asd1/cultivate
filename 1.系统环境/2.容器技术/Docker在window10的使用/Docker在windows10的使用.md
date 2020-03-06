@@ -120,20 +120,16 @@
 
   参考网址  https://www.cnblogs.com/baojunblog/p/11340258.html
 
-1. 重新命名镜像为oracle_11g
+1. 拉取oracle镜像
 
-- C:\Users\Administrator>docker images
-- C:\Users\Administrator>docker tag registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11g  oracle_11g
-
-- C:\Users\Administrator>docker rmi registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11gC:\Users\Administrator>docker images
-  REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-  mysql               5.7.25              98455b9624a9        11 months ago       372MB
-  oracle_11g          latest              3fa112fd3642        4 years ago         6.85GB
+   docker pull registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11g
 
 2. 启动容器
 
-   docker run -d -p 1521:1521 --name oracle11g oracle_11g
+   docker run -d -p 1521:1521 --name oracle11g registry.cn-hangzhou.aliyuncs.com/helowin/oracle_11g
 
+   docker start oracle11g  
+   
 3. 进入容器
 
    docker exec -it oracle11g bash
@@ -153,6 +149,9 @@
    export ORACLE_HOME=/home/oracle/app/oracle/product/11.2.0/dbhome_2
    export ORACLE_SID=helowin
    export PATH=$ORACLE_HOME/bin:$PATH
+
+   使得修改生效：
+   source /etc/profile
 
 4. 创建软连接
 
@@ -174,35 +173,37 @@
 
 7. Navicat连接Oracle
 
-     如果此时去连接oracle的话,navicat会报错:
+   如果此时去连接oracle的话,navicat会报错:
 
    ORA-12514, TNS:listener does not currently know of service requested in connect descriptor
 
-需要进入oracle的docker容器做一个配置:
+   需要进入oracle的docker容器做一个配置:
 
-docker exec -it oracle11g  bash
+   docker exec -it oracle11g  bash
 
-需要找到这个文件tnsnames.ora;
+   需要找到这个文件tnsnames.ora;
 
-然后修改tnsnames.ora
+   这个文件在: $ORACLE_HOME/network/admin:
+   /home/oracle/app/oracle/product/11.2.0/dbhome_2/network/admin
 
-docker_oracle11 =
-(DESCRIPTION =
-(ADDRESS_LIST =
-(ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT =1521))
-)
-(CONNECT_DATA =
-(SERVICE_NAME = helowinXDB)
-)
-)
+   进行修改如下：
+   docker_oracle11 =
+   (DESCRIPTION =
+   (ADDRESS_LIST =
+   (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT =1521))
+   )
+   (CONNECT_DATA =
+   (SERVICE_NAME = helowinXDB)
+   )
+   )
 
-然后重启容器:
+   然后重启容器:
 
-**docker restart 容器id**
+   **docker restart 容器id**
 
-现在可以用system用户连接,密码:system
+   现在可以用system用户连接,密码:system，端口：1521，服务名：helowin
 
-连接之后创建表空间,创建用户就可以使用了
+   连接之后创建表空间,创建用户就可以使用了
 
 
 
